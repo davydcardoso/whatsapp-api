@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Companies {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  token     String    @unique
+  secret    String
+  activated Boolean   @default(true)
+  document  String    @unique
+  createdAt DateTime? @map("created_at") @db.Date
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  sessions Sessions[]
+
+  @@map("companies")
+}
+
+model Sessions {
+  id            String     @id @default(uuid())
+  actived       Boolean    @default(false)
+  companyId     String     @unique @map("company_id")
+  companySecret String     @unique @map("company_secret")
+  sessionJSON   String     @unique @db.Text
+  createdAt     DateTime?  @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  Companies     Companies? @relation(fields: [companyId], references: [id])
+
+  @@map("sessions")
+}
+
+model Contacts {
+  id         String    @id @default(uuid())
+  companyId  String    @map("company_id")
+  name       String
+  phone      String    @unique
+  photo      String
+  whatsappId String    @unique @map("whatsapp_id")
+  createdAt  DateTime? @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("contacts")
+}
+
+enum MessageType {
+  SENT
+  RECEIVED
+}
+
+model Messages {
+  id        String      @id @default(uuid())
+  companyId String      @map("company_id")
+  contactId String      @map("contact_id")
+  type      MessageType
+  read      Boolean     @default(false)
+  body      String?
+  createdAt DateTime?   @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@map("messages")
+}
