@@ -94,16 +94,19 @@ class CreateNewCompany {
 
     const tokenRegistred = Token.register({ companyId, companySecret });
 
-    const companyOrError = Companies.create({
-      name: nameOrError.value,
-      email: emailOrError.value,
-      document: documentOrError.value,
-      actived: true,
-      token: tokenRegistred,
-      secret: companySecret,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    const companyOrError = Companies.create(
+      {
+        name: nameOrError.value,
+        email: emailOrError.value,
+        document: documentOrError.value,
+        actived: true,
+        token: tokenRegistred,
+        secret: companySecret,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      companyId
+    );
 
     if (companyOrError.isLeft()) {
       return left(companyOrError.value);
