@@ -136,12 +136,16 @@ class WhatsappProvider implements iWhatsappProvider {
       authStrategy: new LocalAuth({ clientId: companyId }),
     });
 
-    whatsapp.on("qr", (qrc) => {
+    whatsapp.on("qr", async (qrc) => {
       console.log(
         `Gerando novo qrcode | Empresa ID: ${companyId} | Data Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
       );
 
-      qrcode.generate(qrc, { small: true });
+      await this.sessionsRepository.createQrCode(companyId, qrc);
+
+      if (process.env.API_AMBIENT == "development") {
+        qrcode.generate(qrc, { small: true });
+      }
     });
 
     whatsapp.on("authenticated", async (session) => {

@@ -1,3 +1,4 @@
+import { SessionQrCode } from "@prisma/client";
 import { Sessions } from "../domain/sessions";
 
 export interface iSessionRepository {
@@ -9,4 +10,5 @@ export interface iSessionRepository {
   enable(companyId: String): Promise<void>;
   update(sessions: Sessions): Promise<void>;
   createQrCode(companyId: string, qrcode: string): Promise<void>;
+  getQrCode(companyId: string): Promise<SessionQrCode>;
 }

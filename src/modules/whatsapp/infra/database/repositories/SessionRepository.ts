@@ -1,13 +1,21 @@
 import { Sessions } from "@/modules/whatsapp/domain/sessions";
 import { SessionMapper } from "@/modules/whatsapp/mappers/SessionsMapper";
 import { iSessionRepository } from "@/modules/whatsapp/repositories/iSessionRepository";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, SessionQrCode } from "@prisma/client";
 
 class SessionRepository implements iSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async getQrCode(companyId: string): Promise<SessionQrCode> {
+    return await this.prisma.sessionQrCode.findUnique({ where: { companyId } });
+  }
+
   async createQrCode(companyId: string, qrcode: string): Promise<void> {
-    throw new Error("Method not implemented.");
+    await this.prisma.sessionQrCode.upsert({
+      create: { companyId, qrcode },
+      update: { qrcode },
+      where: { companyId },
+    });
   }
 
   async enable(companyId: string): Promise<void> {
