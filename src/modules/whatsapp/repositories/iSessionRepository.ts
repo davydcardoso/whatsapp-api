@@ -8,4 +8,5 @@ export interface iSessionRepository {
   disable(companyId: string): Promise<void>;
   enable(companyId: String): Promise<void>;
   update(sessions: Sessions): Promise<void>;
+  createQrCode(companyId: string, qrcode: string): Promise<void>;
 }

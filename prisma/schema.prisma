@@ -36,6 +36,16 @@ model Sessions {
   @@map("sessions")
 }
 
+model SessionQrCode {
+  id        String    @id @default(uuid())
+  companyId String    @unique @map("company_id")
+  token     String    @db.Text
+  createdAt DateTime? @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@map("session_qrcode")
+}
+
 model Contacts {
   id         String    @id @default(uuid())
   companyId  String    @map("company_id")

@@ -6,7 +6,11 @@ import { PrismaClient } from "@prisma/client";
 class SessionRepository implements iSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async enable(companyId: String): Promise<void> {
+  async createQrCode(companyId: string, qrcode: string): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async enable(companyId: string): Promise<void> {
     await this.prisma.sessions.update({
       data: { actived: true },
       where: { companyId },
