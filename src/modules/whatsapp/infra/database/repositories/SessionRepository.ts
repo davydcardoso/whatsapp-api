@@ -6,6 +6,23 @@ import { PrismaClient, SessionQrCode } from "@prisma/client";
 class SessionRepository implements iSessionRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async disableAll(): Promise<void> {
+    await this.prisma.$executeRawUnsafe(
+      "update sessions set actived = false, authenticated = false, qrcode = ''"
+    );
+  }
+
+  async createOrUpdate(session: Sessions): Promise<void> {
+    const data = SessionMapper.toPersistence(session);
+    await this.prisma.sessions.upsert({
+      create: data,
+      update: data,
+      where: {
+        companyId: data.companyId,
+      },
+    });
+  }
+
   async getQrCode(companyId: string): Promise<SessionQrCode> {
     return await this.prisma.sessionQrCode.findUnique({ where: { companyId } });
   }

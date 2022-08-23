@@ -1,4 +1,4 @@
-import { Either, right } from "@/core/logic/Either";
+import { Either, left, right } from "@/core/logic/Either";
 import { currentDateFormatted, currentTimeFormatted } from "@/utils/date-time";
 import { iSessionRepository } from "../../repositories/iSessionRepository";
 
@@ -10,28 +10,40 @@ type GetQrcodeSessionRequest = {
 type GetQrcodeSessionResponse = Either<Error, GetQrcodeSessionResponseProps>;
 
 type GetQrcodeSessionResponseProps = {
-  qrcode: string;
-  createdAt: string;
-  updatedAt: string;
+  actived: boolean;
+  authenticated: boolean;
+  companyId: string;
+  companySecret: string;
+  qrcode?: string;
+  createdAt?: Date;
+  updatedAt: Date;
 };
 
-class GetQrcodeSession {
+class GetWhatsappSession {
   constructor(private readonly sessionsRepository: iSessionRepository) {}
 
   async perform({
     companyid: companyId,
     companySecret,
   }: GetQrcodeSessionRequest): Promise<GetQrcodeSessionResponse> {
-    const qrcodeSession = await this.sessionsRepository.getQrCode(companyId);
+    const session = await this.sessionsRepository.findByCompanyId(companyId);
+
+    if (!session) {
+      return left(new Error("Company does not have any session in the system"));
+    }
+
+    const { actived, authenticated, createdAt, qrcode, updatedAt } = session;
 
     return right({
-      qrcode: qrcodeSession.qrcode,
-      createdAt: currentDateFormatted(qrcodeSession.createdAt),
-      updatedAt: `${currentDateFormatted(
-        qrcodeSession.updatedAt
-      )} as ${currentTimeFormatted(qrcodeSession.updatedAt)}`,
+      actived,
+      authenticated,
+      createdAt,
+      qrcode,
+      updatedAt,
+      companyId,
+      companySecret,
     });
   }
 }
 
-export { GetQrcodeSession };
+export { GetWhatsappSession };

@@ -18,20 +18,18 @@ model Companies {
   createdAt DateTime? @map("created_at") @db.Date
   updatedAt DateTime  @updatedAt @map("updated_at")
 
-  sessions Sessions[]
-
   @@map("companies")
 }
 
 model Sessions {
-  id            String     @id @default(uuid())
-  actived       Boolean    @default(false)
-  companyId     String     @unique @map("company_id")
-  companySecret String     @unique @map("company_secret")
-  sessionJSON   String     @unique @db.Text
-  createdAt     DateTime?  @map("created_at")
-  updatedAt     DateTime   @updatedAt @map("updated_at")
-  Companies     Companies? @relation(fields: [companyId], references: [id])
+  id            String    @id @default(uuid())
+  actived       Boolean   @default(false)
+  authenticated Boolean   @default(false)
+  companyId     String    @unique @map("company_id")
+  companySecret String    @unique @map("company_secret")
+  qrcode        String?   @db.Text
+  createdAt     DateTime? @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@map("sessions")
 }

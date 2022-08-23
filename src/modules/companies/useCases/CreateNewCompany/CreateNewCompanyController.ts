@@ -1,5 +1,5 @@
 import { Controller } from "@/core/infra/Controller";
-import { clientError, fail, HttpResponse, ok } from "@/core/infra/HttpResponse";
+import { clientError, fail, HttpResponse, created } from "@/core/infra/HttpResponse";
 import { CreateNewCompany } from "./CreateNewCompany";
 
 type CreateNewCompanyControllerRequest = {
@@ -34,7 +34,7 @@ class CreateNewCompanyController implements Controller {
         }
       }
 
-      return ok(result.value);
+      return created(result.value);
     } catch (err) {
       return fail(err);
     }

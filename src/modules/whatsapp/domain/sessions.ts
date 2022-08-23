@@ -3,9 +3,10 @@ import { Either, right } from "@/core/logic/Either";
 
 type SessionsProps = {
   actived: boolean;
+  authenticated: boolean;
   companyId: string;
   companySecret: string;
-  sessionJSON: string;
+  qrcode?: string;
   createdAt?: Date;
   updatedAt: Date;
 };
@@ -13,6 +14,18 @@ type SessionsProps = {
 class Sessions extends Entity<SessionsProps> {
   get actived() {
     return this.props.actived;
+  }
+
+  set actived(value: boolean) {
+    this.props.actived = value;
+  }
+
+  get authenticated() {
+    return this.props.authenticated;
+  }
+
+  set authenticated(value: boolean) {
+    this.props.authenticated = value;
   }
 
   get companyId() {
@@ -23,8 +36,12 @@ class Sessions extends Entity<SessionsProps> {
     return this.props.companySecret;
   }
 
-  get sesssionJSON() {
-    return this.props.sessionJSON;
+  get qrcode() {
+    return this.props.qrcode;
+  }
+
+  set qrcode(value: string) {
+    this.props.qrcode = value;
   }
 
   get createdAt() {
@@ -33,6 +50,10 @@ class Sessions extends Entity<SessionsProps> {
 
   get updatedAt() {
     return this.props.updatedAt;
+  }
+
+  set updatedAt(value: Date) {
+    this.props.updatedAt = value;
   }
 
   private constructor(props: SessionsProps, id?: string) {

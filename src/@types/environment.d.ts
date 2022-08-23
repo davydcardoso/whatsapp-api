@@ -21,6 +21,7 @@ declare global {
       EMAIL_USER: string;
       EMAIL_PASS: string;
       EMAIL_TLS: boolean;
+      JWT_SECRET: string;
     }
   }
 }

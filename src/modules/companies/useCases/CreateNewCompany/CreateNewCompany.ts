@@ -99,7 +99,7 @@ class CreateNewCompany {
         name: nameOrError.value,
         email: emailOrError.value,
         document: documentOrError.value,
-        actived: true,
+        actived: (process.env.API_AMBIENT == "development" ? true : false),
         token: tokenRegistred,
         secret: companySecret,
         createdAt: new Date(),

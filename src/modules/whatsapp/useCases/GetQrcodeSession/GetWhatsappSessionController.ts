@@ -1,14 +1,14 @@
 import { Controller } from "@/core/infra/Controller";
 import { clientError, fail, HttpResponse, ok } from "@/core/infra/HttpResponse";
-import { GetQrcodeSession } from "./GetQrcodeSession";
+import { GetWhatsappSession } from "./GetQrcodeSession";
 
 type GetQrcodeSessionControllerRequest = {
   companyid: string;
   companySecret: string;
 };
 
-class GetQrcodeSessionController implements Controller {
-  constructor(private readonly getQrcodeSession: GetQrcodeSession) {}
+class GetWhatsappSessionController implements Controller {
+  constructor(private readonly getQrcodeSession: GetWhatsappSession) {}
 
   async handle(
     request: GetQrcodeSessionControllerRequest
@@ -37,4 +37,4 @@ class GetQrcodeSessionController implements Controller {
   }
 }
 
-export { GetQrcodeSessionController };
+export { GetWhatsappSessionController };

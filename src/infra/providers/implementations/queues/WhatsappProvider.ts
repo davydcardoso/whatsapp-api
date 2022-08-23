@@ -35,7 +35,9 @@ class WhatsappProvider implements iWhatsappProvider {
     private readonly sessionsRepository: iSessionRepository,
     private readonly contactsRepository: iContactsRepository,
     private readonly messagesRepository: iMessagesRepository
-  ) {}
+  ) {
+    this.sessionsRepository.disableAll();
+  }
 
   public async processor({ type, sender, recipient }: iDeliverWhatsappJob) {
     console.log(
@@ -118,10 +120,12 @@ class WhatsappProvider implements iWhatsappProvider {
     }
   }
 
-  protected startNewSession({
+  protected async startNewSession({
     companyId,
     companySecret,
   }: StartNewSessionProps) {
+    let session: Sessions = null;
+
     console.log(
       `Sessões registradas no sistema: ${
         this.whatsapp.length || 0
@@ -136,22 +140,42 @@ class WhatsappProvider implements iWhatsappProvider {
       authStrategy: new LocalAuth({ clientId: companyId }),
     });
 
+    session = await this.sessionsRepository.findByCompanyId(companyId);
+
     whatsapp.on("qr", async (qrc) => {
       console.log(
         `Gerando novo qrcode | Empresa ID: ${companyId} | Data Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
       );
 
-      await this.sessionsRepository.createQrCode(companyId, qrc);
+      if (!session) {
+        const newSession = Sessions.create({
+          actived: false,
+          authenticated: false,
+          companyId,
+          companySecret,
+          qrcode: qrc,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        if (newSession.isRight()) {
+          session = newSession.value;
+        }
+      }
+
+      session.actived = false;
+      session.authenticated = false;
+      session.updatedAt = new Date();
+      session.qrcode = qrc;
+
+      await this.sessionsRepository.createOrUpdate(session);
 
       if (process.env.API_AMBIENT == "development") {
         qrcode.generate(qrc, { small: true });
       }
     });
 
-    whatsapp.on("authenticated", async (session) => {
-      const sessionAlreadyExists =
-        await this.sessionsRepository.findByCompanyId(companyId);
-
+    whatsapp.on("authenticated", async (authSession) => {
       if (!session) {
         console.log(
           `Sessão restaurada por Token: ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()} `
@@ -159,56 +183,28 @@ class WhatsappProvider implements iWhatsappProvider {
         return;
       }
 
-      if (!sessionAlreadyExists) {
-        const sessionOrError = Sessions.create({
+      if (!session) {
+        const newSession = Sessions.create({
           actived: true,
+          authenticated: true,
           companyId,
           companySecret,
-          sessionJSON: JSON.stringify(session),
+          qrcode: "SEM-QRCODE",
           createdAt: new Date(),
           updatedAt: new Date(),
         });
 
-        if (sessionOrError.isLeft()) {
-          console.log(
-            `Erro ao registrar sessão do WhatsApp no banco de dados | Data: ${currentDateFormatted()} as ${currentTimeFormatted()} | Detalhes:${
-              sessionOrError.value.message
-            }`
-          );
-          return;
+        if (newSession.isRight()) {
+          session = newSession.value;
         }
-
-        await this.sessionsRepository.createSession(sessionOrError.value);
-        return;
       }
 
-      if (sessionAlreadyExists.actived) {
-        const sessionOrError = Sessions.create(
-          {
-            actived: true,
-            companyId,
-            companySecret,
-            sessionJSON: JSON.stringify(session),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          },
-          sessionAlreadyExists.id
-        );
+      session.actived = true;
+      session.authenticated = true;
+      session.updatedAt = new Date();
+      // session.qrcode = qrc;
 
-        if (sessionOrError.isLeft()) {
-          console.log(
-            `Erro ao atualizar sessão do WhatsApp no banco de dados | Data: ${currentDateFormatted()} as ${currentTimeFormatted()} | Detalhes:${
-              sessionOrError.value.message
-            }`
-          );
-          return;
-        }
-
-        await this.sessionsRepository.update(sessionOrError.value);
-        return;
-      }
-
-      await this.sessionsRepository.enable(companyId);
+      await this.sessionsRepository.createOrUpdate(session);
     });
 
     whatsapp.on("message", async (message) => {
@@ -340,11 +336,33 @@ class WhatsappProvider implements iWhatsappProvider {
       }
     });
 
-    whatsapp.on("auth_failure", (message) =>
+    whatsapp.on("auth_failure", async (message) => {
       console.log(
         `Erro ao iniciar sessão do WhatsApp | Empresa ID: ${companyId} | Detalhes: ${message}`
-      )
-    );
+      );
+      if (!session) {
+        const newSession = Sessions.create({
+          actived: false,
+          authenticated: false,
+          companyId,
+          companySecret,
+          qrcode: "SEM_QRCODE_ERRO_LOGIN",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+
+        if (newSession.isRight()) {
+          session = newSession.value;
+        }
+      }
+
+      session.actived = false;
+      session.authenticated = false;
+      session.updatedAt = new Date();
+      // session.qrcode = qrc;
+
+      await this.sessionsRepository.createOrUpdate(session);
+    });
 
     whatsapp.initialize();
   }

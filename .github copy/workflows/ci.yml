@@ -1,0 +1,52 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: RocketApps API - CI
+
+on:
+  push:
+    branches: [main]
+  # pull_request:
+  #   branches: [main]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Stop this ecosystem PM2 services
+        run: pm2 stop ecosystem.config.js
+        if: ${{failure()}}
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Create .env file
+        run: cp .env.example .env
+
+      - name: Run migrate database
+        run: yarn prisma migrate deploy
+
+      - name: Refresh database and schemas
+        run: yarn prisma generate
+
+      - name: Build all aplication
+        run: yarn build:all
+
+      - name: Initializing seed prisma database
+        run: yarn seed:prisma
+
+      - name: Start all services for PM2
+        run: pm2 start ecosystem.config.js

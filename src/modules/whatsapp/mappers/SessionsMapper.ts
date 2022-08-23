@@ -6,9 +6,10 @@ class SessionMapper {
     return {
       id: raw.id,
       actived: raw.actived,
+      authenticated: raw.authenticated,
       companyId: raw.companyId,
       companySecret: raw.companySecret,
-      sessionJSON: raw.sesssionJSON,
+      qrcode: raw.qrcode,
       createdAt: raw.createdAt,
       updatedAt: raw.updatedAt,
     };
@@ -18,9 +19,10 @@ class SessionMapper {
     const sessionsOrError = Sessions.create(
       {
         actived: raw.actived,
+        authenticated: raw.authenticated,
         companyId: raw.companyId,
         companySecret: raw.companySecret,
-        sessionJSON: raw.sessionJSON,
+        qrcode: raw.qrcode,
         createdAt: raw.createdAt,
         updatedAt: raw.updatedAt,
       },

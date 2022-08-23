@@ -11,4 +11,6 @@ export interface iSessionRepository {
   update(sessions: Sessions): Promise<void>;
   createQrCode(companyId: string, qrcode: string): Promise<void>;
   getQrCode(companyId: string): Promise<SessionQrCode>;
+  createOrUpdate(session: Sessions): Promise<void>;
+  disableAll(): Promise<void>;
 }
