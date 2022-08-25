@@ -27,7 +27,7 @@ jobs:
           cache: "npm"
 
       - name: Stop this ecosystem PM2 services
-        run: pm2 stop ecosystem.config.js
+        run: pm2 stop all
         if: ${{failure()}}
 
       - name: Install dependencies
