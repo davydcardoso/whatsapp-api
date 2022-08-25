@@ -54,11 +54,13 @@ class App {
     );
 
     this.application.get(
-      "/api/rocketapps/version",
+      "/api/waapi/status",
       (request: Request, response: Response, next: NextFunction) => {
         response.send({
+          developer: "Davyd Cardoso",
+          email: "contato@rocketapps.dev",
           version: "0.0.1",
-          lastUpdated: "2022-05-19 14:05",
+          lastUpdated: "2022-8-25 11:25",
         });
       }
     );
