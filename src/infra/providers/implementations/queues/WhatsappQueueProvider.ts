@@ -21,6 +21,10 @@ class WhatsappQueueProvider implements iWhatsappQueueProvider {
     });
   }
 
+  async closeSession(job: iDeliverWhatsappJob): Promise<void> {
+    await this.queue.add("session", job);
+  }
+
   async startSession(Job: iDeliverWhatsappJob): Promise<void> {
     await this.queue.add("session", Job);
   }

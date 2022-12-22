@@ -1,6 +1,11 @@
+import fs from "fs";
 import qrcode from "qrcode-terminal";
 import { Processor, QueueScheduler, Worker } from "bullmq";
-import { Client as WhatsappClient, LocalAuth } from "whatsapp-web.js";
+import {
+  Client as WhatsappClient,
+  LocalAuth,
+  MessageMedia,
+} from "whatsapp-web.js";
 
 import { RedisConnection } from "@/infra/redis/connection";
 import { currentDateFormatted, currentTimeFormatted } from "@/utils/date-time";
@@ -18,12 +23,19 @@ import { iContactsRepository } from "@/modules/whatsapp/repositories/iContactsRe
 import { Messages, MessageType } from "@/modules/whatsapp/domain/messages";
 import { iMessagesRepository } from "@/modules/whatsapp/repositories/iMessagesRepository";
 
+import { publicFolder } from "@/config/multer";
+
 interface WhatsappSessions extends WhatsappClient {
   companyId?: string;
   companySecret?: string;
 }
 
 type StartNewSessionProps = {
+  companyId: string;
+  companySecret: string;
+};
+
+type SessionProps = {
   companyId: string;
   companySecret: string;
 };
@@ -48,17 +60,59 @@ class WhatsappProvider implements iWhatsappProvider {
       case "SESSION":
         this.startNewSession(sender);
         return;
-      default:
+      case "CLOSE_SESSION":
+        this.closeWhatsAppSession(sender);
+        return;
+      case "MESSAGE":
         await this.sendMessage({ type, sender, recipient });
+        return;
+      case "MEDIA_MESSAGE":
+        await this.sendMediaMessage({ type, sender, recipient });
+        return;
+      default:
+        console.log(
+          `Metodo não disponivel no sistema | Company Id: ${
+            sender.companyId
+          } | Data ${currentDateFormatted()} as ${currentTimeFormatted()}`
+        );
         return;
     }
   }
 
-  protected async sendMessage({
+  protected async closeWhatsAppSession({ companyId }: SessionProps) {
+    console.log(
+      `Sessões registradas no sistema: ${
+        this.whatsapp.length || 0
+      } | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
+    );
+
+    try {
+      const session = this.whatsapp.find((wts) => wts.companyId === companyId);
+
+      console.log(
+        `Encerrando sessão | Company ID ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
+      );
+
+      await session.logout();
+      // await session.destroy();
+
+      console.log(
+        `Sessão encerrada com sucesso| Company ID ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
+      );
+    } catch (err) {
+      console.log(
+        `Houve um erro ao fechar sessão do Whatsapp| Company ID ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()} | Detalhes: ${
+          err.message
+        }`
+      );
+    }
+  }
+
+  protected async sendMediaMessage({
     sender,
     recipient,
   }: iDeliverWhatsappJob): Promise<void> {
-    const { companyId, companySecret } = sender;
+    const { companyId } = sender;
     const { contactId, phone, message, contactLocated } = recipient;
 
     console.log(
@@ -83,6 +137,97 @@ class WhatsappProvider implements iWhatsappProvider {
         contact = await this.contactsRepository.findById(contactId);
       }
 
+      const { body, midiaFile } = message;
+
+      if (!midiaFile) {
+        console.log(
+          `Nenhum midia foi informada para o envio da mensagem | Company ID: ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
+        );
+
+        return;
+      }
+
+      console.log(
+        `Enviando arquivo para ${
+          contact.name
+        } | Company Id: ${companyId} | Data ${currentDateFormatted()} as ${currentTimeFormatted()}`
+      );
+
+      const file = MessageMedia.fromFilePath(
+        `${publicFolder}/${midiaFile.fileName}`
+      );
+
+      await session.sendMessage(
+        contactLocated ? contact.whatsappId : `${phone}@c.us`,
+        file,
+        { caption: body }
+      );
+
+      if (process.env.DELETE_FILES_AFTER_UPLOAD) {
+        fs.unlink(`${publicFolder}/${midiaFile.fileName}`, (err) => {
+          if (err) {
+            console.log(
+              `Houve um erro ao excluir arquivo da pasta temporária | Company Id: ${companyId} | Data: ${currentDateFormatted()}  as ${currentTimeFormatted()}`
+            );
+
+            return;
+          }
+
+          console.log(
+            `Arquivo temporário excluido com sucesso | Company Id: ${companyId} | Data: ${currentDateFormatted()}  as ${currentTimeFormatted()}`
+          );
+        });
+      }
+
+      console.log(
+        `Arquivo enviado com sucesso para ${
+          contact.name
+        } | Company Id: ${companyId} | Data ${currentDateFormatted()} as ${currentTimeFormatted()}`
+      );
+    } catch (err) {
+      console.log(
+        `Erro ao enviar mensagem por WhatsApp | Empresa ID: ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()} | Detalhes: ${
+          err.message
+        }`
+      );
+    }
+  }
+
+  protected async sendMessage({
+    sender,
+    recipient,
+  }: iDeliverWhatsappJob): Promise<void> {
+    const { companyId } = sender;
+    const { contactId, phone, message, contactLocated } = recipient;
+
+    console.log(
+      `Sessões registradas no sistema: ${
+        this.whatsapp.length || 0
+      } | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
+    );
+
+    try {
+      const session = this.whatsapp.find((wts) => wts.companyId === companyId);
+
+      if (!session) {
+        console.log(
+          `Não é possivel enviar mensagem, empresa seleciona não possui sessão ativa | Empresa ID: ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
+        );
+        return;
+      }
+
+      let contact: Contacts;
+
+      if (contactLocated) {
+        contact = await this.contactsRepository.findById(contactId);
+      }
+
+      console.log(
+        `Enviando mensagem de texto para ${
+          contact.name
+        } | Company Id: ${companyId} | Data ${currentDateFormatted()} as ${currentTimeFormatted()}`
+      );
+
       await session.sendMessage(
         contactLocated ? contact.whatsappId : `${phone}@c.us`,
         message.body
@@ -90,7 +235,7 @@ class WhatsappProvider implements iWhatsappProvider {
 
       const messageOrError = Messages.create({
         companyId,
-        contactId: contactLocated ? contact.whatsappId : `${phone}@c.us`,
+        contactId: contactLocated ? contact.id : `${phone}@c.us`,
         body: message.body,
         read: false,
         type: MessageType.SENT,
@@ -138,6 +283,9 @@ class WhatsappProvider implements iWhatsappProvider {
 
     const whatsapp: WhatsappSessions = new WhatsappClient({
       authStrategy: new LocalAuth({ clientId: companyId }),
+      // puppeteer: {
+      //   args: process.env.NO_GUI_SYSTEMS ? ["--no-sandbox"] : undefined,
+      // },
     });
 
     session = await this.sessionsRepository.findByCompanyId(companyId);
@@ -170,7 +318,7 @@ class WhatsappProvider implements iWhatsappProvider {
 
       await this.sessionsRepository.createOrUpdate(session);
 
-      if (process.env.API_AMBIENT == "development") {
+      if (process.env.SHOW_QRCODE_IN_TERMINAL) {
         qrcode.generate(qrc, { small: true });
       }
     });
@@ -220,7 +368,7 @@ class WhatsappProvider implements iWhatsappProvider {
       const contactAlreadyExists =
         await this.contactsRepository.findByWhatsappId(contact.id._serialized);
 
-      if (!contactAlreadyExists) {
+      if (!contactAlreadyExists || contactAlreadyExists === null) {
         const contactOrError = Contacts.create({
           name: contact.pushname || contact.shortName || "SEM NOME",
           phone: contact.id.user,
@@ -247,7 +395,9 @@ class WhatsappProvider implements iWhatsappProvider {
         await this.contactsRepository.create(newContact);
       }
 
-      contactId = contactAlreadyExists.id;
+      if (contactAlreadyExists) {
+        contactId = contactAlreadyExists.id;
+      }
 
       const messageOrError = Messages.create({
         companyId,

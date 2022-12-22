@@ -32,7 +32,7 @@ class StartNewWhatsappSessionController implements Controller {
         }
       }
 
-      return ok();
+      return ok(result.value);
     } catch (err) {
       return fail(err);
     }

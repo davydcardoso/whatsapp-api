@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "http": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --exit-child --clear -r tsconfig-paths/register ./src/infra/http/server.ts",
-    "worker":"ts-node-dev --respawn --transpile-only --ignore-watch node_modules --exit-child --clear -r tsconfig-paths/register ./src/infra/queue/worker.ts",
+    "wts": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules --exit-child --clear -r tsconfig-paths/register ./src/infra/queue/worker.ts",
     "build:all": "babel src --extensions \".ts\" --out-dir dist --copy-files"
   },
   "dependencies": {
@@ -28,7 +28,7 @@
     "pino-pretty": "^7.6.1",
     "qrcode-terminal": "^0.12.0",
     "ts-node": "^10.8.2",
-    "whatsapp-web.js": "^1.17.1"
+    "whatsapp-web.js": "^1.18.4"
   },
   "devDependencies": {
     "@babel/cli": "^7.17.10",

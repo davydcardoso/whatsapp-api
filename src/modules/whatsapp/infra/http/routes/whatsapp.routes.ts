@@ -1,14 +1,21 @@
+import multer from "multer";
 import { Router } from "express";
+
+import uploadConfig from "@/config/multer";
 
 import { adaptRoute } from "@/core/infra/adpters/ExpressRouteAdapter";
 import { adaptMiddleware } from "@/core/infra/adpters/ExpressMiddlewareAdapter";
 
 import { makeAuthenticatedMiddleware } from "@/infra/http/factories/middlewares/AuthenticatedMiddleware";
 import { makeGetWhatsappSessionController } from "../factories/GetWhatsappSessionControllerFactory";
+import { makeCloseWhatsAppSessionController } from "../factories/CloseWhatsAppSessionControllerFactory";
 import { makeGetAllMessagesWhatsappController } from "../factories/GetAllMessagesWhatsappControllerFactory";
+import { makeGetAllContactsWhatsAppController } from "../factories/GetAllContactsWhatsAppControllerFactory";
+import { makeSendWhatsAppFileMessageController } from "../factories/SendWhatsAppFileMessageControllerFactory";
 import { makeStartNewWhatsappSessionController } from "../factories/StartNewWhatsappSessionControllerFactory";
 import { makeSendWhatsAppTextMessageController } from "../factories/SendWhatsAppTextMessageControllerFactory";
-import { makeGetAllContactsWhatsAppController } from "../factories/GetAllContactsWhatsAppControllerFactory";
+
+const upload = multer(uploadConfig);
 
 class WhatsappRoutes {
   public router: Router;
@@ -16,14 +23,24 @@ class WhatsappRoutes {
   constructor() {
     this.router = Router();
 
-    this.AuthRoutes();
+    this.SessionsRoutes();
+    this.MessagesRoutes();
+    this.ContactsRoutes();
   }
 
-  protected AuthRoutes() {
-    this.router.post(
-      "/session/start",
+  protected ContactsRoutes() {
+    this.router.get(
+      "/contacts",
       adaptMiddleware(makeAuthenticatedMiddleware()),
-      adaptRoute(makeStartNewWhatsappSessionController())
+      adaptRoute(makeGetAllContactsWhatsAppController())
+    );
+  }
+
+  protected MessagesRoutes() {
+    this.router.get(
+      "/message/",
+      adaptMiddleware(makeAuthenticatedMiddleware()),
+      adaptRoute(makeGetAllMessagesWhatsappController())
     );
 
     this.router.post(
@@ -32,22 +49,31 @@ class WhatsappRoutes {
       adaptRoute(makeSendWhatsAppTextMessageController())
     );
 
+    this.router.post(
+      "/message/file",
+      adaptMiddleware(makeAuthenticatedMiddleware()),
+      upload.single("file"),
+      adaptRoute(makeSendWhatsAppFileMessageController())
+    );
+  }
+
+  protected SessionsRoutes() {
+    this.router.post(
+      "/session/start",
+      adaptMiddleware(makeAuthenticatedMiddleware()),
+      adaptRoute(makeStartNewWhatsappSessionController())
+    );
+
+    this.router.put(
+      "/session/close",
+      adaptMiddleware(makeAuthenticatedMiddleware()),
+      adaptRoute(makeCloseWhatsAppSessionController())
+    );
+
     this.router.get(
       "/session/",
       adaptMiddleware(makeAuthenticatedMiddleware()),
       adaptRoute(makeGetWhatsappSessionController())
-    );
-
-    this.router.get(
-      "/message/",
-      adaptMiddleware(makeAuthenticatedMiddleware()),
-      adaptRoute(makeGetAllMessagesWhatsappController())
-    );
-
-    this.router.get(
-      "/contacts",
-      adaptMiddleware(makeAuthenticatedMiddleware()),
-      adaptRoute(makeGetAllContactsWhatsAppController())
     );
   }
 }

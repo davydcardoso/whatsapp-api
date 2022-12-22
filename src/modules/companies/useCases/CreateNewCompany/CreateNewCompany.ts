@@ -15,6 +15,7 @@ import { DocumentAlreadyRegisteredInTheSystemError } from "./errors/DocumentAlre
 import { InvalidCompanyDocumentError } from "../../domain/errors/InvalidCompanyDocumentError";
 import { InvalidCompanyEmailError } from "../../domain/errors/InvalidCompanyEmailError";
 import { InvalidCompanyTokenError } from "../../domain/errors/InvalidCompanyTokenError";
+import { CompaniesMapper } from "../../mappers/CompaniesMapper";
 
 type CreateNewCompanyRequest = {
   name: string;
@@ -32,9 +33,7 @@ type CreateNewCompanyResponse = Either<
   CreateNewCompanyResponseProps
 >;
 
-type CreateNewCompanyResponseProps = {
-  token: string;
-};
+type CreateNewCompanyResponseProps = {};
 
 class CreateNewCompany {
   constructor(private readonly companiesRepository: iCompaniesRepository) {}
@@ -99,7 +98,7 @@ class CreateNewCompany {
         name: nameOrError.value,
         email: emailOrError.value,
         document: documentOrError.value,
-        actived: (process.env.API_AMBIENT == "development" ? true : false),
+        actived: process.env.API_AMBIENT == "development" ? true : false,
         token: tokenRegistred,
         secret: companySecret,
         createdAt: new Date(),
@@ -120,7 +119,9 @@ class CreateNewCompany {
     //   await this.companiesRepository.createSession(phone, company.id);
     // }
 
-    return right({ token: tokenRegistred });
+    return right({
+      company: CompaniesMapper.toPersistence(company),
+    });
   }
 }
 

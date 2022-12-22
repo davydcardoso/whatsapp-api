@@ -38,6 +38,10 @@ class CompaniesRepository implements iCompaniesRepository {
   async findById(id: string): Promise<Companies> {
     const company = await this.prisma.companies.findUnique({ where: { id } });
 
+    if (!company) {
+      return null;
+    }
+
     return CompaniesMapper.toDomain(company);
   }
 

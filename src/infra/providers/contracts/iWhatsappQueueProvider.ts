@@ -7,4 +7,5 @@ export type Job = {
 export interface iWhatsappQueueProvider {
   sendMessage(job: iDeliverWhatsappJob): Promise<void>;
   startSession(Job: iDeliverWhatsappJob): Promise<void>;
+  closeSession(job: iDeliverWhatsappJob): Promise<void>;
 }

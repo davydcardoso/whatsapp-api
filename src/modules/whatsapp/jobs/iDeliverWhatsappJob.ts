@@ -1,6 +1,8 @@
 export enum TypeJobWhatsApp {
   SESSION,
+  CLOSE_SESSION,
   MESSAGE,
+  MEDIA_MESSAGE,
 }
 
 export interface iDeliverWhatsappJob {
@@ -15,6 +17,13 @@ export interface iDeliverWhatsappJob {
     contactLocated: boolean;
     message: {
       isMedia: boolean;
+      midiaFile?: {
+        messageId: string;
+        mediaMessageId: string;
+        mediaType: string;
+        filePath: string;
+        fileName: string;
+      };
       body: string;
     };
   };

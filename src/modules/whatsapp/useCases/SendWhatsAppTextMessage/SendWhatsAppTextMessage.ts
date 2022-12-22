@@ -77,7 +77,7 @@ class SendWhatsAppTextMessage {
         "Contato informado não está salvo no sistema, sua mensagem sera enviada mas o telefone tem que estár 100% correto"
       );
     }
-
+    
     await this.whatsAppQueueProvider.sendMessage({
       type: TypeJobWhatsApp.MESSAGE,
       sender: {

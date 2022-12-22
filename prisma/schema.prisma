@@ -28,7 +28,7 @@ model Sessions {
   companyId     String    @unique @map("company_id")
   companySecret String    @unique @map("company_secret")
   qrcode        String?   @db.Text
-  createdAt     DateTime? @map("created_at")
+  createdAt     DateTime? @map("created_at") @db.Date
   updatedAt     DateTime  @updatedAt @map("updated_at")
 
   @@map("sessions")
@@ -38,7 +38,7 @@ model SessionQrCode {
   id        String    @id @default(uuid())
   companyId String    @unique @map("company_id")
   qrcode    String    @db.Text
-  createdAt DateTime? @map("created_at")
+  createdAt DateTime? @map("created_at") @db.Date
   updatedAt DateTime  @updatedAt @map("updated_at")
 
   @@map("session_qrcode")
@@ -51,7 +51,7 @@ model Contacts {
   phone      String    @unique
   photo      String
   whatsappId String    @unique @map("whatsapp_id")
-  createdAt  DateTime? @map("created_at")
+  createdAt  DateTime? @map("created_at") @db.Date
   updatedAt  DateTime  @updatedAt @map("updated_at")
 
   @@map("contacts")
@@ -69,8 +69,23 @@ model Messages {
   type      MessageType
   read      Boolean     @default(false)
   body      String?
-  createdAt DateTime?   @map("created_at")
+  isMedia   Boolean     @default(false)
+  createdAt DateTime?   @map("created_at") @db.Date
   updatedAt DateTime    @updatedAt @map("updated_at")
 
   @@map("messages")
+}
+
+model MediaMessages {
+  id           String    @id @default(uuid())
+  companyId    String    @map("company_id")
+  messageId    String    @map("message_id")
+  fileName     String    @map("filename") @db.Text
+  originalName String    @map("original_name") @db.Text
+  mimetype     String    @db.VarChar()
+  destination  String    @db.Text
+  createdAt    DateTime? @map("created_at") @db.Date
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@map("media_messages")
 }

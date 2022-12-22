@@ -22,6 +22,10 @@ declare global {
       EMAIL_PASS: string;
       EMAIL_TLS: boolean;
       JWT_SECRET: string;
+      NO_GUI_SYSTEMS: boolean;
+      DELETE_FILES_AFTER_UPLOAD: boolean;
+      SHOW_SQL_SCRIPTS: boolean;
+      SHOW_QRCODE_IN_TERMINAL: boolean;
     }
   }
 }

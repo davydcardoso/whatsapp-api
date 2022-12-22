@@ -8,6 +8,14 @@ export const MIME_TYPE_MAP = {
   "image/jpeg": "jpg",
   "image/jpg": "jpg",
   "file/psd": "psd",
+  "application/msword": "doc",
+  "audio/mpeg": "mp3",
+  "video/mp4": "mp4",
+  "video/mpeg": "mpeg",
+  "application/pdf": "pdf",
+  "application/xml": "xml",
+  "text/xml": "xml",
+  "application/atom+xml": "xml",
   "application/vnd.android.package-archive": "apk",
 };
 

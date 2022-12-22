@@ -6,6 +6,16 @@ import { PrismaClient } from "@prisma/client";
 class MessagesRepository implements iMessagesRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async delete(id: string): Promise<void> {
+    const message = await this.prisma.messages.findUnique({ where: { id } });
+
+    if (!message) {
+      return null;
+    }
+
+    await this.prisma.mediaMessages.delete({ where: { id } });
+  }
+
   async create(message: Messages): Promise<void> {
     const data = MessagesMapper.toPersistence(message);
 

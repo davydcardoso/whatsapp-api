@@ -41,11 +41,13 @@ class AuthenticationMiddleware implements Middleware {
         const company = await this.companiesRepository.findByToken(token);
 
         if (!company) {
-          return unauthorized(new Error("Company is not registred in system"));
+          return unauthorized(new Error("Cadastro não localizado no sistema"));
         }
 
         if (!company.actived) {
-          return unauthorized(new Error("Company account is not actived"));
+          return unauthorized(
+            new Error("A conta de sua empresa ainda não foi ativada")
+          );
         }
 
         const decoded = decode(token) as DecodedJwt;

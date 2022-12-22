@@ -1,7 +1,7 @@
 import { Middleware } from "@/core/infra/Middleware";
 import { ConnectionPrisma } from "@/infra/databases/prisma/connection";
 import { CompaniesRepository } from "@/modules/companies/infra/databases/repositories/CompaniesRepository";
-import { AuthenticationMiddleware } from "../../middlewares/AuthentucateMiddlaware";
+import { AuthenticationMiddleware } from "../../middlewares/AuthenticationMiddleware";
 
 export function makeAuthenticatedMiddleware(): Middleware {
   const companiesRepository = new CompaniesRepository(ConnectionPrisma);
