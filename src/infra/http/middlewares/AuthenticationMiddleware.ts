@@ -38,6 +38,14 @@ class AuthenticationMiddleware implements Middleware {
       if (authorization) {
         const [, token] = authorization.split(" ");
 
+        if (!token) {
+          return unauthorized(
+            new Error(
+              "Token informado está invalido, favor verifique e tente novamente"
+            )
+          );
+        }
+
         const company = await this.companiesRepository.findByToken(token);
 
         if (!company) {

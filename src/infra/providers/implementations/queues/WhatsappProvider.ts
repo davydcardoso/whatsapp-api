@@ -94,7 +94,6 @@ class WhatsappProvider implements iWhatsappProvider {
       );
 
       await session.logout();
-      // await session.destroy();
 
       console.log(
         `Sessão encerrada com sucesso| Company ID ${companyId} | Data: ${currentDateFormatted()} as ${currentTimeFormatted()}`
@@ -490,6 +489,7 @@ class WhatsappProvider implements iWhatsappProvider {
       console.log(
         `Erro ao iniciar sessão do WhatsApp | Empresa ID: ${companyId} | Detalhes: ${message}`
       );
+
       if (!session) {
         const newSession = Sessions.create({
           actived: false,

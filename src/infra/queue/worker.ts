@@ -25,7 +25,7 @@ const whatsappProvider = new WhatsappProvider(
 );
 
 whatsappProvider.process(async ({ data }) => {
-  whatsappProvider.processor(data);
+  await whatsappProvider.processor(data);
 });
 
 logger.info(
