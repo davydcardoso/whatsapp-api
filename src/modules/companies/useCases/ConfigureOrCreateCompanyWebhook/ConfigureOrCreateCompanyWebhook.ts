@@ -1,4 +1,5 @@
 import { Either, right } from "@/core/logic/Either";
+import { iCompaniesRepository } from "../../repositories/iCompaniesRepository";
 
 type ConfigureOrCreateCompanyWebhookRequest = {
   companyId: string;
@@ -8,7 +9,14 @@ type ConfigureOrCreateCompanyWebhookRequest = {
 type ConfigureOrCreateCompanyWebhookResponse = Either<Error, object>;
 
 export class ConfigureOrCreateCompanyWebhook {
-  async perform({}: ConfigureOrCreateCompanyWebhookRequest): Promise<ConfigureOrCreateCompanyWebhookResponse> {
+  constructor(private readonly companiesRepository: iCompaniesRepository) {}
+
+  async perform({
+    companyId,
+    webhook,
+  }: ConfigureOrCreateCompanyWebhookRequest): Promise<ConfigureOrCreateCompanyWebhookResponse> {
+    const company = await this;
+
     return right({});
   }
 }
