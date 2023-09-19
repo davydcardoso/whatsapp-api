@@ -7,14 +7,31 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Settings {
+  id    String @id @default(uuid())
+  name  String @db.VarChar()
+  value String @db.VarChar()
+
+  companies Companies[]
+
+  createdAt DateTime @map("created_at") @db.Date
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
 model Companies {
-  id        String    @id @default(uuid())
+  id        String  @id @default(uuid())
   name      String
-  email     String    @unique
-  token     String    @unique
+  email     String  @unique
+  token     String  @unique
   secret    String
-  activated Boolean   @default(true)
-  document  String    @unique
+  activated Boolean @default(true)
+  document  String  @unique
+  webhook   String? @unique @db.VarChar()
+
+  settings Settings[]
+
   createdAt DateTime? @map("created_at") @db.Date
   updatedAt DateTime  @updatedAt @map("updated_at")
 

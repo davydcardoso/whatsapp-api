@@ -8,6 +8,7 @@ import { makeAuthenticatedMiddleware } from "@/infra/http/factories/middlewares/
 import { makeCreateNewCompanyController } from "../factories/CreateNewCompanyControllerFactory";
 import { makeFetchCompanyTokenController } from "../factories/FetchCompanyTokenControllerFactory";
 import { makeUpdateCompanyAccessTokenController } from "../factories/UpdateCompanyAccessTokenControllerFactory";
+import { makeConfigureOrCreateCompanyWebhookController } from "../factories/ConfigureOrCreateCompanyWebhookControllerFactory";
 
 class CompaniesRoutes {
   public router: Router;
@@ -16,6 +17,7 @@ class CompaniesRoutes {
     this.router = Router();
 
     this.publicRoutes();
+    this.settingsRoutes();
   }
 
   protected publicRoutes() {
@@ -27,6 +29,14 @@ class CompaniesRoutes {
       "/token",
       adaptMiddleware(makeAuthenticatedMiddleware()),
       adaptRoute(makeUpdateCompanyAccessTokenController())
+    );
+  }
+
+  protected settingsRoutes() {
+    this.router.put(
+      "/settings/webhook",
+      adaptMiddleware(makeAuthenticatedMiddleware()),
+      adaptRoute(makeConfigureOrCreateCompanyWebhookController())
     );
   }
 }

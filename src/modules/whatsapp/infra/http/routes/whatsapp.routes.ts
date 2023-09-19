@@ -35,7 +35,7 @@ class WhatsappRoutes {
       adaptRoute(makeGetAllContactsWhatsAppController())
     );
   }
-
+  
   protected MessagesRoutes() {
     this.router.get(
       "/message/",

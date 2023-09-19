@@ -12,7 +12,7 @@ export const adaptRoute = (controller: Controller) => {
         ...request.headers,
         ...request.files,
         ...request.file,
-        companyid: request.companyId,
+        companyId: request.companyId,
         companySecret: request.companySecret,
       };
 
